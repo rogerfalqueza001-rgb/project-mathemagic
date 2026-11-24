@@ -1,0 +1,108 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Project Mathemagic</title>
+<style>
+:root{--g:#1b6e38;--l:#43c765;--y:#ffc83d;--o:#ff8a3d;--b:#2b6cff;--r:#ff4d5e;--ink:#1f2d24}
+*{box-sizing:border-box}body{margin:0;font-family:"Trebuchet MS",system-ui,sans-serif;color:var(--ink);min-height:100vh;background:linear-gradient(#aee9ff,#d8ffc4 55%,#6fcf67);overflow-x:hidden}
+.screen{display:none;max-width:640px;margin:0 auto;padding:16px}.screen.on{display:block}
+h1{font-size:2.2rem;margin:.2em 0;color:var(--g);text-shadow:2px 2px 0 var(--y)}h2{margin:.3em 0}
+.card{background:#fff;border:4px solid var(--g);border-radius:22px;padding:16px;margin:12px 0;box-shadow:0 6px 0 var(--g)}
+.guide{font-size:4rem;display:inline-block;animation:bob 1.2s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-10px) rotate(6deg)}}
+input{width:100%;font:inherit;font-size:1.2rem;padding:10px;border:3px solid var(--b);border-radius:14px;margin:6px 0}
+button{font:inherit;font-weight:bold;font-size:1.1rem;border:0;border-radius:16px;padding:12px 18px;background:var(--o);color:#fff;box-shadow:0 5px 0 #c2611c;cursor:pointer}
+button:active{transform:translateY(4px);box-shadow:0 1px 0 #c2611c}button:focus-visible,input:focus-visible{outline:4px solid var(--b)}
+.alt{background:var(--b);box-shadow:0 5px 0 #1a47b0}.sm{padding:6px 12px;font-size:.95rem}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.world{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:var(--c,#fff);color:#222;box-shadow:0 6px 0 rgba(0,0,0,.25);margin:10px 0}
+.world.lock{filter:grayscale(1);opacity:.6}.world .e{font-size:2.6rem}
+.pill{background:var(--y);border-radius:20px;padding:4px 12px;font-weight:bold}
+.q{font-size:1.2rem;line-height:1.5}.done{color:var(--g);font-weight:bold}
+.shake{animation:sh .4s}@keyframes sh{25%{transform:translateX(-12px)}75%{transform:translateX(12px)}}
+.fx{position:fixed;top:-40px;font-size:2rem;pointer-events:none;animation:fall 2s linear forwards;z-index:9}@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+.chest{font-size:6rem;text-align:center;animation:pop .8s}@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.3)}}
+#msg{min-height:1.6em;font-weight:bold}.bad{color:var(--r)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style></head><body>
+
+<section id="login" class="screen on"><div style="text-align:center"><div class="guide">🐵</div><h1>Project Mathemagic</h1><p>Join Kiko's jungle quest and crack the number codes!</p></div>
+<div class="card"><label>Your codename</label><input id="nm" maxlength="24" autocomplete="off">
+<button class="alt sm" onclick="gen()">🎲 New codename</button>
+<label style="display:block;margin-top:10px">Section (e.g. 6-Sampaguita)</label><input id="sc" maxlength="20" autocomplete="off">
+<p><button onclick="enter()">Start adventure!</button></p><p id="lm" class="bad"></p></div></section>
+
+<section id="hub" class="screen"><div class="bar"><div><b id="hn"></b><br><span class="pill" id="hr"></span></div><div><span class="pill" id="hg"></span> <button class="sm alt" onclick="mute()" id="mb">🔊</button></div></div>
+<h2>Choose your adventure</h2><div id="wl"></div><button class="sm alt" onclick="logout()">Switch explorer</button></section>
+
+<section id="play" class="screen"><div class="bar"><button class="sm alt" onclick="hub()">⬅ Map</button><b id="pt"></b><span id="ph"></span></div>
+<div class="card"><div class="guide" style="font-size:2.5rem">🐵</div><div class="q" id="pq"></div></div>
+<div class="card" id="sb"><div id="dn"></div><div class="q" id="sq"></div><input id="an" inputmode="decimal" placeholder="Type your answer" autocomplete="off">
+<p><button onclick="check()">Check ✔</button> <button class="alt" onclick="hint()">💡 Hint (-5💎)</button></p><div id="msg"></div></div></section>
+
+<section id="win" class="screen" style="text-align:center"><div class="chest" id="ch">🧰</div><h1 id="wt"></h1><p id="wp" class="q"></p><button onclick="hub()">Back to map</button></section>
+
+<script>
+const API="https://script.google.com/macros/s/AKfycbxLfvlR0DDZHYlLKEBX-w7de73_vwasF89is-4euKtdw-ca4u2TfwN8DJ7hP6LtIQ/exec";
+const W=[
+{n:"Jungle Trail",e:"🌴",c:"#c8f7c5",p:[
+{t:"Mang Ben bought 3 notebooks at ₱28 each and 2 pens at ₱15 each. How much did he pay in all?",h:"Multiply for each item first, then add.",s:[["Cost of 3 notebooks (₱)?",84],["Cost of 2 pens (₱)?",30],["Total paid (₱)?",114]]},
+{t:"A bus carries 45 pupils. 6 buses are full, and 38 more pupils ride in a van. How many pupils are there in all?",h:"Find pupils in buses first.",s:[["Pupils in 6 buses?",270],["Pupils in all?",308]]},
+{t:"👑 BOSS: Ana had ₱500. She bought 4 kg of rice at ₱46 per kg and 3 kg of sugar at ₱38 per kg. How much change did she get?",h:"Find each cost, add them, subtract from ₱500.",s:[["Cost of rice (₱)?",184],["Cost of sugar (₱)?",114],["Change (₱)?",202]]}]},
+{n:"Fraction Falls",e:"💧",c:"#c9eaff",p:[
+{t:"A ribbon is 3 m long. ½ m is cut for a gift and ¾ m for a card. How many meters are left?",h:"Add the pieces used, then subtract from 3. (Decimals or fractions are OK.)",s:[["Meters used in all?",1.25],["Meters left?",1.75]]},
+{t:"Lola baked 24 puto. She gave ⅓ of them to neighbors, then ate ¼ of the rest. How many puto are left?",h:"⅓ of 24 first. Then take ¼ of what remains.",s:[["Puto given away?",8],["Puto Lola ate?",4],["Puto left?",12]]},
+{t:"👑 BOSS: A tank holds 120 L and is ⅗ full. Then 15 L is poured out and 2.5 L is added. How many liters are in the tank now?",h:"Start with ⅗ of 120.",s:[["Liters at first?",72],["Liters after pouring out?",57],["Liters now?",59.5]]}]},
+{n:"Percent Peak",e:"⛰️",c:"#ffe9b8",p:[
+{t:"A bag costs ₱800 and has a 25% discount. What is the sale price?",h:"Find the discount first. Then subtract.",s:[["Discount (₱)?",200],["Sale price (₱)?",600]]},
+{t:"A school has 400 pupils. 45% are girls. How many are boys?",h:"Find the girls first.",s:[["Number of girls?",180],["Number of boys?",220]]},
+{t:"👑 BOSS: Mia saved ₱1,200. She spent 30% on books, then 20% of the money that remained on a bag. How much is left?",h:"Money after books is 70% of ₱1,200.",s:[["Money after buying books (₱)?",840],["Cost of the bag (₱)?",168],["Money left (₱)?",672]]}]},
+{n:"Measure Mountain",e:"📏",c:"#ffd6e0",p:[
+{t:"A rectangular garden is 12 m by 8 m. Fencing costs ₱35 per meter. How much will the fence cost?",h:"Fence goes around the garden: perimeter.",s:[["Perimeter (m)?",40],["Cost of fence (₱)?",1400]]},
+{t:"A tank measures 50 cm × 30 cm × 20 cm. How many liters can it hold? (1,000 cm³ = 1 L)",h:"Volume = length × width × height.",s:[["Volume (cm³)?",30000],["Capacity (L)?",30]]},
+{t:"👑 BOSS: A lot is 15 m by 10 m. A 5 m by 5 m square pond is in it. The rest is planted with grass at ₱20 per m². What is the total cost?",h:"Subtract the pond's area from the lot's area.",s:[["Area of the lot (m²)?",150],["Area of the grass (m²)?",125],["Total cost (₱)?",2500]]}]},
+{n:"Data Dunes",e:"🏜️",c:"#fff0a8",p:[
+{t:"Kiko's quiz scores are 82, 90, 78, 94 and 86. What is the average?",h:"Average = sum ÷ number of scores.",s:[["Sum of the scores?",430],["Average?",86]]},
+{t:"Ana's average in 4 quizzes is 85. She scores 95 in the 5th quiz. What is her new average?",h:"Total of 4 quizzes = 85 × 4.",s:[["Total of the first 4 quizzes?",340],["Total of 5 quizzes?",435],["New average?",87]]},
+{t:"👑 BOSS: A jeepney travels at 45 km/h for 2 hours, then at 60 km/h for 1.5 hours. What is the total distance?",h:"Distance = speed × time for each part.",s:[["Distance in the first part (km)?",90],["Distance in the second part (km)?",90],["Total distance (km)?",180]]}]}];
+const RK=[[0,"Rookie Explorer"],[100,"Trail Blazer"],[200,"Jungle Ranger"],[300,"Master Adventurer"]];
+const $=i=>document.getElementById(i);
+let S,key,cw,cp,cs,hearts,miss,t0,muted=false,ac,started=false;
+// ---- sound
+function tone(f,d=.15,t="sine",v=.15,w=0){if(muted)return;ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),T=ac.currentTime+w;o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,T);g.gain.exponentialRampToValueAtTime(.001,T+d);o.connect(g);g.connect(ac.destination);o.start(T);o.stop(T+d)}
+const sfx={ok:()=>[523,659,784].forEach((f,i)=>tone(f,.18,"triangle",.2,i*.08)),no:()=>{tone(220,.25,"sawtooth",.12);tone(165,.3,"sawtooth",.12,.15)},win:()=>[523,659,784,1047,1319,1568].forEach((f,i)=>tone(f,.25,"triangle",.2,i*.1)),tap:()=>tone(660,.05,"square",.06)};
+const M=[262,330,392,440,392,330,294,330];let mi=0;setInterval(()=>{if(started&&!muted)tone(M[mi++%8],.35,"sine",.05)},450);
+function mute(){muted=!muted;$("mb").textContent=muted?"🔇":"🔊"}
+function boom(a=["⭐","💎","🎉","🪙","🌟"]){for(let i=0;i<28;i++){const s=document.createElement("span");s.className="fx";s.textContent=a[i%a.length];s.style.left=Math.random()*95+"vw";s.style.animationDelay=Math.random()*.6+"s";document.body.append(s);setTimeout(()=>s.remove(),3000)}}
+// ---- backend
+function post(o){if(!API)return;try{fetch(API,{method:"POST",mode:"no-cors",body:JSON.stringify(o)})}catch(e){}}
+async function pull(){if(!API)return;try{const r=await(await fetch(API+"?action=load&key="+encodeURIComponent(key))).json();if(r.ok&&r.gems>S.gems){S.gems=r.gems;S.done=r.done}}catch(e){}}
+function save(){try{localStorage.setItem("mm_"+key,JSON.stringify(S))}catch(e){}post({action:"save",key,name:S.name,section:S.sec,gems:S.gems,rank:rank(),done:S.done})}
+function rank(){let r=RK[0][1];RK.forEach(k=>{if(S.gems>=k[0])r=k[1]});return r}
+// ---- login
+const A=["Brave","Swift","Mighty","Clever","Blazing","Sunny","Lucky","Bold"],N=["Falcon","Jaguar","Panda","Tiger","Parrot","Dolphin","Eagle","Monkey"];
+function gen(){sfx.tap();$("nm").value=A[Math.random()*8|0]+N[Math.random()*8|0]+(10+Math.random()*90|0)}
+gen();try{$("sc").value=localStorage.getItem("mm_sec")||""}catch(e){}
+function show(i){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id==i))}
+async function enter(){const n=$("nm").value.trim(),c=$("sc").value.trim();if(n.length<3||!c){$("lm").textContent="Add a codename (3+ letters) and your section.";return}
+started=true;sfx.ok();key=(c+"|"+n).toLowerCase();let l=null;try{l=JSON.parse(localStorage.getItem("mm_"+key));localStorage.setItem("mm_sec",c)}catch(e){}
+S=l||{gems:0,done:{}};S.name=n;S.sec=c;$("lm").textContent="Loading...";await pull();$("lm").textContent="";save();hub()}
+function logout(){started=false;show("login")}
+// ---- hub
+function cnt(w){return W[w].p.filter((_,p)=>S.done[w+"-"+p]).length}
+function hub(){sfx.tap();$("hn").textContent="🐵 "+S.name+" ("+S.sec+")";$("hr").textContent="🏅 "+rank();$("hg").textContent="💎 "+S.gems;
+$("wl").innerHTML=W.map((w,i)=>{const open=i==0||cnt(i-1)==3;return`<button class="card world ${open?"":"lock"}" style="--c:${w.c}" ${open?`onclick="go(${i})"`:"disabled"}><span class="e">${open?w.e:"🔒"}</span><span><b>${w.n}</b><br>${cnt(i)}/3 problems ${cnt(i)==3?"✅":""}</span></button>`}).join("");show("hub")}
+// ---- play
+function go(w){sfx.tap();cw=w;hearts=5;next(0)}
+function next(p){cp=p;cs=0;const P=W[cw].p[p];$("pt").textContent=W[cw].e+" "+W[cw].n+" "+(p+1)+"/3";$("pq").textContent=P.t;show("play");step()}
+function step(){const P=W[cw].p[cp];$("ph").textContent="❤️".repeat(hearts);$("dn").innerHTML=P.s.slice(0,cs).map(x=>`<div class="done">✔ ${x[0]} ${x[1]}</div>`).join("");
+$("sq").textContent="Step "+(cs+1)+" of "+P.s.length+": "+P.s[cs][0];$("an").value="";$("msg").textContent="";$("msg").className="";miss=0;t0=Date.now();$("an").focus()}
+function parse(v){v=v.replace(/[₱,\s]/g,"");if(v.includes("/")){const[a,b]=v.split("/");return a/b}return v===""?NaN:Number(v)}
+function check(){const P=W[cw].p[cp],ans=P.s[cs][1],v=parse($("an").value),ok=Math.abs(v-ans)<.01,sec=Math.round((Date.now()-t0)/1000);
+if(isNaN(v)){$("msg").textContent="Type a number first.";return}
+if(ok){post({action:"log",key,name:S.name,section:S.sec,w:cw+1,p:cp+1,s:cs+1,ok:1,ans:v,sec});S.gems+=10;sfx.ok();boom();$("msg").textContent="Correct! +10 💎";$("msg").className="done";cs++;
+if(cs<P.s.length)return void setTimeout(step,900);S.done[cw+"-"+cp]=1;S.gems+=cp==2?20:10;save();setTimeout(()=>{if(cp<2)next(cp+1);else fin()},1100);return}
+post({action:"log",key,name:S.name,section:S.sec,w:cw+1,p:cp+1,s:cs+1,ok:0,ans:v,sec});miss++;hearts--;sfx.no();$("ph").textContent="❤️".repeat(hearts);$("sb").classList.add("shake");setTimeout(()=>$("sb").classList.remove("shake"),450);
+if(hearts<=0){$("msg").textContent="Out of hearts! Try this world again. 💪";$("msg").className="bad";return void setTimeout(hub,1800)}
+if(miss>=2){$("msg").textContent="The answer is "+ans+". Let's keep going!";$("msg").className="bad";cs++;if(cs<P.s.length)return void setTimeout(step,1800);return void setTimeout(()=>{if(cp<2)next(cp+1);else fin()},1800)}
+$("msg").textContent="Not yet. Check your work, or use a hint.";$("msg").className="bad"}
+function hint(){if(S.gems<5){$("msg").textContent="You need 5 💎 for a hint.";return}S.gems-=5;sfx.tap();$("msg").textContent="💡 "+W[cw].p[cp].h;$("msg").className=""}
+$("an").addEventListener("keydown",e=>{if(e.key=="Enter")check()});
+function fin(){save();show("win");$("ch").textContent="🧰";$("wt").textContent=cnt(cw)==3?W[cw].n+" cleared!":W[cw].n;$("wp").textContent="💎 "+S.gems+" · 🏅 "+rank();sfx.win();setTimeout(()=>{$("ch").textContent="💰✨";boom(["💎","🪙","🏆","🎉"])},900)}
+</script></body></html>
